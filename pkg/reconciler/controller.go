@@ -21,6 +21,7 @@ package reconciler
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 
@@ -48,6 +49,33 @@ func NewTemplateReconciler(client client.Client, log logr.Logger, index *templat
 	}
 }
 
+// SyncWithCluster does updates the reconcile state with the cluster state. Do that before to start watching for changes
+func (tr *TemplateReconciler) SyncWithCluster(namespace string) error {
+	templates := &templatev1.TemplateList{}
+
+	opts := &client.ListOptions{
+		Namespace: namespace,
+	}
+	err := tr.client.List(context.TODO(), opts, templates)
+	if err != nil {
+		tr.log.Error(err, "failed to list existing templates")
+		return err
+	}
+
+	tr.log.Info(fmt.Sprintf("syncing %v templates", len(templates.Items)))
+	start := time.Now()
+	count, err := tr.index.AddTemplates(templates.Items)
+	end := time.Now()
+
+	if err != nil {
+		tr.log.Error(err, "failed to sync existing templates")
+		return err
+	}
+
+	tr.log.Info(fmt.Sprintf("synced %v templates in %v", count, end.Sub(start)))
+	return nil
+}
+
 func (tr *TemplateReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// set up a convinient log object so we don't have to type request over and over again
 	log := tr.log.WithValues("request", request)
@@ -59,12 +87,12 @@ func (tr *TemplateReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 	t := &templatev1.Template{}
 	err := tr.client.Get(context.TODO(), request.NamespacedName, t)
 	if errors.IsNotFound(err) {
-		log.Error(nil, "Could not find Template")
+		log.Error(nil, "could not find Template")
 		return reconcile.Result{}, nil
 	}
 
 	if err != nil {
-		log.Error(err, "Could not fetch Template")
+		log.Error(err, "could not fetch Template")
 		return reconcile.Result{}, err
 	}
 

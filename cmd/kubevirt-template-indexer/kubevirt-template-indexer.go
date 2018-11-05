@@ -52,6 +52,7 @@ var log = logf.Log.WithName("kubevirt-template-indexer")
 
 func main() {
 	develMode := flag.BoolP("develmode", "D", false, "enable development mode (more logs)")
+	startupSync := flag.BoolP("skipsync", "s", true, "skip initial sync with cluster")
 	namespace := flag.StringP("namespace", "N", "", "restrict namespace to watch (default: all)")
 	flag.Parse()
 
@@ -82,13 +83,25 @@ func main() {
 		os.Exit(1)
 	}
 
+	entryLog.Info("setting up reconciler")
+	tr := reconciler.NewTemplateReconciler(mgr.GetClient(), log.WithName("reconciler"), index)
+
 	entryLog.Info("setting up controller")
 	c, err := controller.New("foo-controller", mgr, controller.Options{
-		Reconciler: reconciler.NewTemplateReconciler(mgr.GetClient(), log.WithName("reconciler"), index),
+		Reconciler: tr,
 	})
 	if err != nil {
 		entryLog.Error(err, "unable to set up individual controller")
 		os.Exit(1)
+	}
+
+	if *startupSync {
+		entryLog.Info("syncing reconciler")
+		err = tr.SyncWithCluster(*namespace)
+		if err != nil {
+			entryLog.Error(err, "unable to sync with cluster")
+			os.Exit(1)
+		}
 	}
 
 	if err := c.Watch(&source.Kind{Type: &templatev1.Template{}}, &handler.EnqueueRequestForObject{}); err != nil {

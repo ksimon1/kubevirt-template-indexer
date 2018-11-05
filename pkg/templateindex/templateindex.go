@@ -32,14 +32,34 @@ import (
 type TemplateIndex struct {
 	rwlock    sync.RWMutex
 	log       logr.Logger
-	templates map[types.UID]*templatev1.Template
+	templates map[types.UID]templatev1.Template
 }
 
 func NewTemplateIndex(log logr.Logger) *TemplateIndex {
 	return &TemplateIndex{
 		log:       log,
-		templates: make(map[types.UID]*templatev1.Template),
+		templates: make(map[types.UID]templatev1.Template),
 	}
+}
+
+// Set the initial state of the index. You must call this before to watch for updates.
+func (ti *TemplateIndex) AddTemplates(ts []templatev1.Template) (int, error) {
+	var err error
+	var count int
+
+	// unneeded, but better safe than sorry
+	ti.rwlock.Lock()
+	defer ti.rwlock.Unlock()
+
+	for _, t := range ts {
+		err = ti.add(&t)
+
+		if err != nil {
+			return count, err
+		}
+		count += 1
+	}
+	return count, nil
 }
 
 func (ti *TemplateIndex) Update(t *templatev1.Template) error {
@@ -50,11 +70,16 @@ func (ti *TemplateIndex) Update(t *templatev1.Template) error {
 
 	_, ok := ti.templates[t.UID]
 	if !ok {
-		ti.templates[t.UID] = t
-		ti.log.Info(fmt.Sprintf("added template: %v", t.UID))
+		ti.add(t)
 	} else {
 		delete(ti.templates, t.UID)
 		ti.log.Info(fmt.Sprintf("removed template: %v", t.UID))
 	}
+	return nil
+}
+
+func (ti *TemplateIndex) add(t *templatev1.Template) error {
+	ti.templates[t.UID] = *t
+	ti.log.Info(fmt.Sprintf("added template: %v", t.UID))
 	return nil
 }
