@@ -20,6 +20,7 @@ package reconciler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 
@@ -50,6 +51,9 @@ func NewTemplateReconciler(client client.Client, log logr.Logger, index *templat
 func (tr *TemplateReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// set up a convinient log object so we don't have to type request over and over again
 	log := tr.log.WithValues("request", request)
+
+	log.Info(fmt.Sprintf("reconciliation started on %v", request.NamespacedName))
+	defer log.Info(fmt.Sprintf("reconciliation completed on %v", request.NamespacedName))
 
 	// Fetch the Template from the cache
 	t := &templatev1.Template{}

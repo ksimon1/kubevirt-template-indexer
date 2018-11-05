@@ -19,6 +19,7 @@
 package templateindex
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/go-logr/logr"
@@ -44,13 +45,16 @@ func NewTemplateIndex(log logr.Logger) *TemplateIndex {
 func (ti *TemplateIndex) Update(t *templatev1.Template) error {
 	ti.rwlock.Lock()
 	defer ti.rwlock.Unlock()
+
+	ti.log.Info(fmt.Sprintf("handling template: %v", t.UID))
+
 	_, ok := ti.templates[t.UID]
 	if !ok {
 		ti.templates[t.UID] = t
-		ti.log.V(4).Info("added template: %v", t.UID)
+		ti.log.Info(fmt.Sprintf("added template: %v", t.UID))
 	} else {
 		delete(ti.templates, t.UID)
-		ti.log.V(4).Info("removed template: %v", t.UID)
+		ti.log.Info(fmt.Sprintf("removed template: %v", t.UID))
 	}
 	return nil
 }
