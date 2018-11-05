@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kubevirt-template-indexer
+  namespace: kube-system
+  labels:
+    kubevirt.io: "template-indexer"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+        scheduler.alpha.kubernetes.io/tolerations: |
+                  [
+                    {
+                      "key": "CriticalAddonsOnly",
+                      "operator": "Exists"
+                    }
+                  ]
+      labels:
+        kubevirt.io: kubevirt-template-indexer
+    spec:
+      serviceAccountName: template-indexer 
+      containers:
+        - name: kubevirt-template-indexer
+          image: fromanirh/kubevirt-template-indexer:devel
+          imagePullPolicy: IfNotPresent
+          command:
+              - "kubevirt-template-indexer"
+              - "-N"
+              - "kube-system"
+          ports:
+            - containerPort: 8443
+              name: "template-index"
+              protocol: "TCP"
+          livenessProbe:
+            failureThreshold: 8
+            httpGet:
+              scheme: HTTPS
+              port: 8443
+              path: /healthz
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
