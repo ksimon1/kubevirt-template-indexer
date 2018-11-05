@@ -11,6 +11,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Golang helpers
+# Golang stuff
+cmd/kubevirt-template-indexer/kubevirt-template-indexer
 vendor/
 Gopkg.lock
