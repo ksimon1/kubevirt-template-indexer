@@ -25,7 +25,9 @@ import (
 
 	templatev1 "github.com/openshift/api/template/v1"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -38,10 +40,19 @@ import (
 	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 
+// AddToSchemes may be used to add all resources defined in the project to a Scheme
+var AddToSchemes runtime.SchemeBuilder
+
+// AddToScheme adds all Resources to the Scheme
+func AddToScheme(s *runtime.Scheme) error {
+	return AddToSchemes.AddToScheme(s)
+}
+
 var log = logf.Log.WithName("kubevirt-template-indexer")
 
 func main() {
 	develMode := flag.BoolP("develmode", "D", false, "enable development mode (more logs)")
+	namespace := flag.StringP("namespace", "N", "", "restrict namespace to watch (default: all)")
 	flag.Parse()
 
 	logf.SetLogger(logf.ZapLogger(*develMode))
@@ -51,13 +62,27 @@ func main() {
 
 	// Setup a Manager
 	entryLog.Info("setting up manager")
-	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{})
+	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{Namespace: *namespace})
 	if err != nil {
 		entryLog.Error(err, "unable to set up overall controller manager")
 		os.Exit(1)
 	}
 
-	entryLog.Info("Setting up controller")
+	entryLog.Info("registering Components")
+
+	// Setup Scheme for all resources
+	if err := AddToScheme(mgr.GetScheme()); err != nil {
+		entryLog.Error(err, "unable to set up the basic scheme")
+		os.Exit(1)
+	}
+
+	// Setup Scheme for templates
+	if err := templatev1.AddToScheme(mgr.GetScheme()); err != nil {
+		entryLog.Error(err, "unable to set up the template scheme")
+		os.Exit(1)
+	}
+
+	entryLog.Info("setting up controller")
 	c, err := controller.New("foo-controller", mgr, controller.Options{
 		Reconciler: reconciler.NewTemplateReconciler(mgr.GetClient(), log.WithName("reconciler"), index),
 	})
