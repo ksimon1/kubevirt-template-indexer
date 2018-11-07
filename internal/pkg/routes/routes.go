@@ -99,6 +99,8 @@ func filterOptions(r *http.Request) templateindex.FilterOptions {
 	query := r.URL.Query()
 	opts := templateindex.FilterOptions{}
 	for _, param := range []string{"os", "workload", "size"} {
+		// intentionally ignore unknown parameters.
+		// TODO: log them?
 		if value := query.Get(param); value != "" {
 			opts[param] = value
 		}
