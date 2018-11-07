@@ -38,10 +38,10 @@ type TemplateReconciler struct {
 	// client can be used to retrieve objects from the APIServer.
 	client client.Client
 	log    logr.Logger
-	index  *templateindex.TemplateIndex
+	index  *templateindex.TemplateIndexer
 }
 
-func NewTemplateReconciler(client client.Client, log logr.Logger, index *templateindex.TemplateIndex) *TemplateReconciler {
+func NewTemplateReconciler(client client.Client, log logr.Logger, index *templateindex.TemplateIndexer) *TemplateReconciler {
 	return &TemplateReconciler{
 		client: client,
 		log:    log,

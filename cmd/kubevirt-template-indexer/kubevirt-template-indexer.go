@@ -52,7 +52,7 @@ func main() {
 	logf.SetLogger(logf.ZapLogger(*develMode))
 	entryLog := log.WithName("entrypoint")
 
-	index := templateindex.NewTemplateIndex(log.WithName("indexer"))
+	index := templateindex.NewTemplateIndexer(log.WithName("indexer"))
 
 	// Setup a Manager
 	entryLog.Info("setting up manager")

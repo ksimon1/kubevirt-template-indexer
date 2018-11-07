@@ -19,6 +19,7 @@
 package templateindex
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -29,21 +30,66 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type TemplateIndex struct {
-	rwlock    sync.RWMutex
-	log       logr.Logger
+type FilterOptions map[string]string
+
+type TemplateIndexer struct {
+	rwlock sync.RWMutex
+	log    logr.Logger
+	// holds the real data
 	templates map[types.UID]templatev1.Template
+	ledgers   map[string]Ledger
 }
 
-func NewTemplateIndex(log logr.Logger) *TemplateIndex {
-	return &TemplateIndex{
+func NewTemplateIndexer(log logr.Logger) *TemplateIndexer {
+	return &TemplateIndexer{
 		log:       log,
 		templates: make(map[types.UID]templatev1.Template),
+		ledgers:   make(map[string]Ledger),
 	}
 }
 
+func (ti *TemplateIndexer) Count() int {
+	return len(ti.templates)
+}
+
+func (ti *TemplateIndexer) AddLedger(name string, ld Ledger) {
+	ti.ledgers[name] = ld
+}
+
+func (ti *TemplateIndexer) SummarizeBy(name string) ([]Summary, error) {
+	ld, ok := ti.ledgers[name]
+	if !ok {
+		return []Summary{}, errors.New(fmt.Sprintf("invalid label: %v", name))
+	}
+
+	templates := make([]templatev1.Template, 0, len(ti.templates))
+	for _, template := range ti.templates {
+		templates = append(templates, template)
+	}
+	return ld.Summarize(templates), nil
+}
+
+func (ti *TemplateIndexer) DescribeBy(opts FilterOptions) ([]Description, error) {
+	descriptions := []Description{}
+	for _, template := range ti.templates {
+		matched := 0
+		for key, value := range opts {
+			label := makeLabel(key, value)
+			if _, ok := template.Labels[label]; ok {
+				matched += 1
+			} else {
+				// TODO: log
+			}
+		}
+		if matched == len(opts) {
+			descriptions = append(descriptions, Describe(&template))
+		}
+	}
+	return descriptions, nil
+}
+
 // Set the initial state of the index. You must call this before to watch for updates.
-func (ti *TemplateIndex) AddTemplates(ts []templatev1.Template) (int, error) {
+func (ti *TemplateIndexer) AddTemplates(ts []templatev1.Template) (int, error) {
 	var err error
 	var count int
 
@@ -62,7 +108,7 @@ func (ti *TemplateIndex) AddTemplates(ts []templatev1.Template) (int, error) {
 	return count, nil
 }
 
-func (ti *TemplateIndex) Update(t *templatev1.Template) error {
+func (ti *TemplateIndexer) Update(t *templatev1.Template) error {
 	ti.rwlock.Lock()
 	defer ti.rwlock.Unlock()
 
@@ -72,14 +118,19 @@ func (ti *TemplateIndex) Update(t *templatev1.Template) error {
 	if !ok {
 		ti.add(t)
 	} else {
-		delete(ti.templates, t.UID)
-		ti.log.Info(fmt.Sprintf("removed template: %v", t.UID))
+		ti.remove(t)
 	}
 	return nil
 }
 
-func (ti *TemplateIndex) add(t *templatev1.Template) error {
+func (ti *TemplateIndexer) add(t *templatev1.Template) error {
 	ti.templates[t.UID] = *t
 	ti.log.Info(fmt.Sprintf("added template: %v", t.UID))
+	return nil
+}
+
+func (ti *TemplateIndexer) remove(t *templatev1.Template) error {
+	delete(ti.templates, t.UID)
+	ti.log.Info(fmt.Sprintf("removed template: %v", t.UID))
 	return nil
 }
