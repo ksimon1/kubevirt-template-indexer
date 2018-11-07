@@ -19,6 +19,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	flag "github.com/spf13/pflag"
@@ -39,14 +40,23 @@ import (
 	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 
 	_ "github.com/fromanirh/kubevirt-template-indexer/pkg/okd"
+
+	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/routes"
 )
 
 var log = logf.Log.WithName("kubevirt-template-indexer")
+
+type ledgerDesc struct {
+	Name  string
+	Label string
+}
 
 func main() {
 	develMode := flag.BoolP("develmode", "D", false, "enable development mode (more logs)")
 	startupSync := flag.BoolP("skipsync", "s", true, "skip initial sync with cluster")
 	namespace := flag.StringP("namespace", "N", "", "restrict namespace to watch (default: all)")
+	iface := flag.StringP("interface", "I", "", "listen only on this interface for REST queries (default: all)")
+	port := flag.IntP("port", "p", 8080, "listen on port for REST queries (default: 8080)")
 	flag.Parse()
 
 	logf.SetLogger(logf.ZapLogger(*develMode))
@@ -112,6 +122,9 @@ func main() {
 		entryLog.Error(err, "unable to watch Templates")
 		os.Exit(1)
 	}
+
+	entryLog.Info("starting REST endpoints")
+	go routes.Serve(*iface, *port, index, log.WithName("restapi"))
 
 	entryLog.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
