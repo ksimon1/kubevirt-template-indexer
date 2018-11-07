@@ -25,6 +25,10 @@
 #   unused-packages = true
 
 [[constraint]]
+  name = "github.com/openshift/api"
+  revision = "v3.9.0"
+
+[[constraint]]
   name = "sigs.k8s.io/controller-runtime"
   version = "v0.1.7"
 
