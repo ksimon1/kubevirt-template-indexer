@@ -32,20 +32,20 @@ var templates []templatev1.Template
 
 func init() {
 	var err error
-	templates, err = testutils.LoadTemplates("template-data.yaml")
+	templates, err = testutils.LoadTemplates("test-data-alltemplates.yaml")
 	if err != nil || len(templates) < 1 {
 		panic("cannot load test templates!")
 	}
 }
 
 func TestDescribe(t *testing.T) {
-	templates, err := testutils.LoadTemplates("template-data.yaml")
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
 	if err != nil || len(templates) < 1 {
 		t.Errorf("cannot load test templates!")
 		return
 	}
 	for _, template := range templates {
-		desc := templateindex.Describe(&template)
+		desc := templateindex.Describe(&template, templateindex.FilterOptions{})
 		if desc.Name == "" || desc.ID == "" || desc.Icon == "" || desc.OS == "" || desc.Workload == "" || desc.Size == "" {
 			t.Errorf("%#v", desc)
 		}

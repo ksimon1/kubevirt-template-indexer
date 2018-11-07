@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: centos7-generic-large
+  annotations:
+    openshift.io/display-name: "CentOS 7.0+ VM"
+    description: >-
+      This template can be used to create a VM suitable for
+      CentOS 7 and newer.
+      The template assumes that a PVC is available which is providing the
+      necessary CentOS disk image.
+    tags: "kubevirt,virtualmachine,linux,centos"
+
+    iconClass: "icon-centos"
+    openshift.io/provider-display-name: "KubeVirt"
+    openshift.io/documentation-url: "https://github.com/kubevirt/common-templates"
+    openshift.io/support-url: "https://github.com/kubevirt/common-templates/issues"
+    template.openshift.io/bindable: "false"
+
+    template.cnv.io/version: v1alpha1
+    defaults.template.cnv.io/disk: rootdisk
+    template.cnv.io/editable: |
+      /objects[0].spec.template.spec.domain.cpu.cores
+      /objects[0].spec.template.spec.domain.resources.requests.memory
+      /objects[0].spec.template.spec.domain.devices.disks
+      /objects[0].spec.template.spec.volumes
+      /objects[0].spec.template.spec.networks
+
+  labels:
+    os.template.cnv.io/centos7.0: "true"
+    workload.template.cnv.io/generic: "true"
+    flavor.template.cnv.io/large: "true"
+    template.cnv.io/type: "base"
+
+objects:
+- apiVersion: kubevirt.io/v1alpha2
+  kind: VirtualMachine
+  metadata:
+    name: ${NAME}
+    osinfoname: centos7.0
+    labels:
+      vm.cnv.io/template: centos7-generic-large
+  spec:
+    running: false
+    template:
+      spec:
+        domain:
+
+          cpu:
+            cores: 2
+          resources:
+            requests:
+              memory: 6G
+          devices:
+            rng: {}
+            disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+              volumeName: rootvolume
+        terminationGracePeriodSeconds: 0
+        volumes:
+        - name: rootvolume
+          persistentVolumeClaim:
+            claimName: ${PVCNAME}
+        - cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              password: centos
+              chpasswd: { expire: False }
+          name: cloudinitvolume
+
+parameters:
+- description: VM name
+  from: 'centos7-[a-z0-9]{16}'
+  generate: expression
+  name: NAME
+- name: PVCNAME
+  description: Name of the PVC with the disk image
+  required: true
+

@@ -30,8 +30,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type FilterOptions map[string]string
-
 type TemplateIndexer struct {
 	rwlock sync.RWMutex
 	log    logr.Logger
@@ -82,7 +80,7 @@ func (ti *TemplateIndexer) DescribeBy(opts FilterOptions) ([]Description, error)
 			}
 		}
 		if matched == len(opts) {
-			descriptions = append(descriptions, Describe(&template))
+			descriptions = append(descriptions, Describe(&template, opts))
 		}
 	}
 	return descriptions, nil

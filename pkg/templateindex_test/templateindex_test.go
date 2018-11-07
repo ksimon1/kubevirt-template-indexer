@@ -34,7 +34,19 @@ func TestTemplateIndexerCreatedEmpty(t *testing.T) {
 	}
 }
 
-func TestTemplateIndexerInvalidLedger(t *testing.T) {
+func TestTemplateIndexerUnknownLedger(t *testing.T) {
+	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	summaries, err := ti.SummarizeBy("unknown")
+	if err == nil {
+		t.Errorf("unexpectedly succesful")
+	}
+	if len(summaries) != 0 {
+		t.Errorf("unexpected output: %v", summaries)
+	}
+
+}
+
+func TestTemplateIndexerEmptyLedger(t *testing.T) {
 	ld, err := templateindex.NewJSONLedger("foobar", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)

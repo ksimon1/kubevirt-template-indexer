@@ -1,4 +1,3 @@
-# Source: dist/templates/centos7-generic-large.yaml
 apiVersion: v1
 kind: Template
 metadata:

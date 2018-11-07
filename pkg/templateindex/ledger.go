@@ -36,7 +36,9 @@ type Description struct {
 	Size        string `json:"size"`
 }
 
-func Describe(t *templatev1.Template) Description {
+type FilterOptions map[string]string
+
+func Describe(t *templatev1.Template, opts FilterOptions) Description {
 	desc := Description{
 		Summary: Summary{
 			ID:   t.Name,
@@ -44,15 +46,18 @@ func Describe(t *templatev1.Template) Description {
 		},
 		Description: t.Annotations["description"],
 		Icon:        t.Annotations["iconClass"],
+		OS:          opts["os"],
+		Workload:    opts["workload"],
+		Size:        opts["size"],
 	}
 	for key, value := range t.Labels {
-		if os, ok := tryToGetFlavour(key, value, "os.template.cnv.io"); ok {
+		if os, ok := tryToGetFlavour(key, value, "os.template.cnv.io"); ok && desc.OS == "" {
 			desc.OS = os
 		}
-		if workload, ok := tryToGetFlavour(key, value, "workload.template.cnv.io"); ok {
+		if workload, ok := tryToGetFlavour(key, value, "workload.template.cnv.io"); ok && desc.Workload == "" {
 			desc.Workload = workload
 		}
-		if size, ok := tryToGetFlavour(key, value, "flavor.template.cnv.io"); ok {
+		if size, ok := tryToGetFlavour(key, value, "flavor.template.cnv.io"); ok && desc.Size == "" {
 			desc.Size = size
 		}
 	}
