@@ -31,7 +31,10 @@ import (
 
 	templatev1 "github.com/openshift/api/template/v1"
 
-	_ "github.com/fromanirh/kubevirt-template-indexer/pkg/okd"
+	// turns out we need the double legacy registration here
+	// while in cluster we only need the modern way, otherwise
+	// it breaks. TODO: investigate
+	_ "github.com/fromanirh/kubevirt-template-indexer/pkg/okdlegacy"
 	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 

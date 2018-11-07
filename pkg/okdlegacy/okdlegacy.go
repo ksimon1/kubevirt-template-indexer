@@ -37,4 +37,20 @@ func init() {
 	securityv1.AddToScheme(scheme.Scheme)
 	templatev1.AddToScheme(scheme.Scheme)
 	userv1.AddToScheme(scheme.Scheme)
+
+	// If you need to serialize/deserialize legacy (non-API group) OpenShift
+	// types (e.g. v1, Route), these must be additionally registered using
+	// AddToSchemeInCoreGroup.
+	appsv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	authorizationv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	buildv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	imagev1.AddToSchemeInCoreGroup(scheme.Scheme)
+	networkv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	oauthv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	projectv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	quotav1.AddToSchemeInCoreGroup(scheme.Scheme)
+	routev1.AddToSchemeInCoreGroup(scheme.Scheme)
+	securityv1.AddToSchemeInCoreGroup(scheme.Scheme)
+	templatev1.AddToSchemeInCoreGroup(scheme.Scheme)
+	userv1.AddToSchemeInCoreGroup(scheme.Scheme)
 }
