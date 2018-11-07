@@ -47,14 +47,25 @@ func NewTemplateIndexer(log logr.Logger) *TemplateIndexer {
 }
 
 func (ti *TemplateIndexer) Count() int {
+	// unneeded, but better safe than sorry
+	ti.rwlock.RLock()
+	defer ti.rwlock.RUnlock()
+
 	return len(ti.templates)
 }
 
 func (ti *TemplateIndexer) AddLedger(name string, ld Ledger) {
+	// unneeded, but better safe than sorry
+	ti.rwlock.Lock()
+	defer ti.rwlock.Unlock()
+
 	ti.ledgers[name] = ld
 }
 
 func (ti *TemplateIndexer) SummarizeBy(name string) ([]Summary, error) {
+	ti.rwlock.RLock()
+	defer ti.rwlock.RUnlock()
+
 	ld, ok := ti.ledgers[name]
 	if !ok {
 		return []Summary{}, errors.New(fmt.Sprintf("invalid label: %v", name))
@@ -68,6 +79,9 @@ func (ti *TemplateIndexer) SummarizeBy(name string) ([]Summary, error) {
 }
 
 func (ti *TemplateIndexer) DescribeBy(opts FilterOptions) ([]Description, error) {
+	ti.rwlock.RLock()
+	defer ti.rwlock.RUnlock()
+
 	descriptions := []Description{}
 	for _, template := range ti.templates {
 		matched := 0
