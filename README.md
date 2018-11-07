@@ -16,7 +16,6 @@ TODO
 - error responses are not handled (and unspecified)
 - expose the service outside the cluster?
 - /template filtering is untested
-- expose parameters for /template filtering
 - lack of unit tests for "templateindex" package
 - check why sometimes the sync doesn't happen (just timing?)
 - functional tests?
