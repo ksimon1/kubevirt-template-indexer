@@ -37,6 +37,13 @@ func splitLabel(label string) (string, bool) {
 	return items[1], true
 }
 
+func fixLabelKey(key string) string {
+	if key == "size" {
+		return "flavor"
+	}
+	return key
+}
+
 func makeLabel(key, value string) string {
 	return fmt.Sprintf("%s.%s/%s", key, suffix, value)
 }

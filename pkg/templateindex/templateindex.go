@@ -86,7 +86,7 @@ func (ti *TemplateIndexer) DescribeBy(opts FilterOptions) ([]Description, error)
 	for _, template := range ti.templates {
 		matched := 0
 		for key, value := range opts {
-			label := makeLabel(key, value)
+			label := makeLabel(fixLabelKey(key), value)
 			if _, ok := template.Labels[label]; ok {
 				matched += 1
 			} else {
