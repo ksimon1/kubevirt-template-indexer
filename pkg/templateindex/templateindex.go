@@ -26,22 +26,22 @@ import (
 	"github.com/go-logr/logr"
 
 	templatev1 "github.com/openshift/api/template/v1"
-
-	"k8s.io/apimachinery/pkg/types"
 )
 
 type TemplateIndexer struct {
 	rwlock sync.RWMutex
 	log    logr.Logger
 	// holds the real data
-	templates map[types.UID]templatev1.Template
+	// TODO: figure out if we are supposed to use UID,
+	// or if Name is good enough.
+	templates map[string]templatev1.Template
 	ledgers   map[string]Ledger
 }
 
 func NewTemplateIndexer(log logr.Logger) *TemplateIndexer {
 	return &TemplateIndexer{
 		log:       log,
-		templates: make(map[types.UID]templatev1.Template),
+		templates: make(map[string]templatev1.Template),
 		ledgers:   make(map[string]Ledger),
 	}
 }
@@ -124,9 +124,9 @@ func (ti *TemplateIndexer) Update(t *templatev1.Template) error {
 	ti.rwlock.Lock()
 	defer ti.rwlock.Unlock()
 
-	ti.log.Info(fmt.Sprintf("handling template: %v", t.UID))
+	ti.log.Info(fmt.Sprintf("handling template: %v", t.Name))
 
-	_, ok := ti.templates[t.UID]
+	_, ok := ti.templates[t.Name]
 	if !ok {
 		ti.add(t)
 	} else {
@@ -136,13 +136,13 @@ func (ti *TemplateIndexer) Update(t *templatev1.Template) error {
 }
 
 func (ti *TemplateIndexer) add(t *templatev1.Template) error {
-	ti.templates[t.UID] = *t
-	ti.log.Info(fmt.Sprintf("added template: %v", t.UID))
+	ti.templates[t.Name] = *t
+	ti.log.Info(fmt.Sprintf("added template: %v", t.Name))
 	return nil
 }
 
 func (ti *TemplateIndexer) remove(t *templatev1.Template) error {
-	delete(ti.templates, t.UID)
-	ti.log.Info(fmt.Sprintf("removed template: %v", t.UID))
+	delete(ti.templates, t.Name)
+	ti.log.Info(fmt.Sprintf("removed template: %v", t.Name))
 	return nil
 }
