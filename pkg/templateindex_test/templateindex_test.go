@@ -64,3 +64,36 @@ func TestTemplateIndexerEmptyLedger(t *testing.T) {
 	expected := []templateindex.Summary{}
 	testutils.CheckSummaries(t, summaries, expected)
 }
+
+func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("cannot add test templates! %v", err)
+		return
+	}
+
+	OS := "centos7.0"
+
+	descs, err := ti.DescribeBy(templateindex.FilterOptions{
+		"os": OS,
+	})
+	if err != nil || len(descs) < 1 {
+		t.Errorf("unexpected output: %v err=%v", len(descs), err)
+		return
+	}
+
+	// first, the filtered output must NOT include unwanted data
+	for _, desc := range descs {
+		if desc.OS != OS {
+			t.Errorf("OS mismatch: requested %v found %v", OS, desc.OS)
+		}
+	}
+	// TODO: then, the filtered output must include ALL wanted data
+}
