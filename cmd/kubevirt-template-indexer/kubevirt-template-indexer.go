@@ -54,6 +54,31 @@ func main() {
 
 	index := templateindex.NewTemplateIndexer(log.WithName("indexer"))
 
+	descs := []ledgerDesc{
+		ledgerDesc{
+			Name:  "os",
+			Label: "os",
+		},
+		ledgerDesc{
+			Name:  "workload",
+			Label: "workload",
+		},
+		ledgerDesc{
+			Name:  "size",
+			Label: "flavor",
+		},
+	}
+	for _, desc := range descs {
+		ld, err := templateindex.NewJSONLedger(desc.Label, "")
+		if err != nil {
+			entryLog.Error(err, fmt.Sprintf("unable to set up ledger: %s for %s", desc.Name, desc.Label))
+			os.Exit(1)
+		}
+
+		index.AddLedger(desc.Name, ld)
+		entryLog.Info(fmt.Sprintf("added ledger %s for label=%s", desc.Name, desc.Label))
+	}
+
 	// Setup a Manager
 	entryLog.Info("setting up manager")
 	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{Namespace: *namespace})
