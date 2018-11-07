@@ -22,26 +22,14 @@ import (
 	"sort"
 	"testing"
 
-	templatev1 "github.com/openshift/api/template/v1"
-
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/testutils"
 	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 
-var templates []templatev1.Template
-
-func init() {
-	var err error
-	templates, err = testutils.LoadTemplates("test-data-alltemplates.yaml")
-	if err != nil || len(templates) < 1 {
-		panic("cannot load test templates!")
-	}
-}
-
 func TestDescribe(t *testing.T) {
 	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
 	if err != nil || len(templates) < 1 {
-		t.Errorf("cannot load test templates!")
+		t.Errorf("cannot load test templates! %v", err)
 		return
 	}
 	for _, template := range templates {
@@ -60,6 +48,12 @@ func TestCreateJSONLedgerWithoutFile(t *testing.T) {
 }
 
 func TestInvalidLedger(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
 	ld, err := templateindex.NewJSONLedger("foobar", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -73,6 +67,12 @@ func TestInvalidLedger(t *testing.T) {
 }
 
 func TestOSLedger(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
 	ld, err := templateindex.NewJSONLedger("os", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -103,6 +103,12 @@ func TestOSLedger(t *testing.T) {
 }
 
 func TestWorkloadLedger(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
 	ld, err := templateindex.NewJSONLedger("workload", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -119,6 +125,12 @@ func TestWorkloadLedger(t *testing.T) {
 }
 
 func TestSizeLedger(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
 	ld, err := templateindex.NewJSONLedger("flavor", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
