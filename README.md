@@ -7,3 +7,16 @@ License: APACHE v2
 Copyright: Red Hat Inc
 
 Real documentation coming soon.
+
+TODO
+----
+- fix this README
+- code docs
+- routes package uses globals
+- error responses are not handled (and unspecified)
+- expose the service outside the cluster?
+- /template filtering is untested
+- expose parameters for /template filtering
+- lack of unit tests for "templateindex" package
+- check why sometimes the sync doesn't happen (just timing?)
+- functional tests?
