@@ -95,22 +95,9 @@ func sizes(w http.ResponseWriter, r *http.Request) {
 	summarize("size", w, r)
 }
 
-func filterOptions(r *http.Request) templateindex.FilterOptions {
-	query := r.URL.Query()
-	opts := templateindex.FilterOptions{}
-	for _, param := range []string{"os", "workload", "size"} {
-		// intentionally ignore unknown parameters.
-		// TODO: log them?
-		if value := query.Get(param); value != "" {
-			opts[param] = value
-		}
-	}
-	return opts
-}
-
 func templates(w http.ResponseWriter, r *http.Request) {
 
-	descriptions, err := index.DescribeBy(filterOptions(r))
+	descriptions, err := index.DescribeBy(templateindex.FilterOptionsFromURL(r.URL))
 	if err != nil {
 		panic(err)
 	}

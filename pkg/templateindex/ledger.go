@@ -38,8 +38,6 @@ type Description struct {
 	Size        string `json:"size"`
 }
 
-type FilterOptions map[string]string
-
 func Describe(t *templatev1.Template, opts FilterOptions) Description {
 	desc := Description{
 		Summary: Summary{

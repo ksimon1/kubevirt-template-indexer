@@ -97,6 +97,7 @@ func (ti *TemplateIndexer) DescribeBy(opts FilterOptions) ([]Description, error)
 			descriptions = append(descriptions, Describe(&template, opts))
 		}
 	}
+	ti.log.Info(fmt.Sprintf("returning %v descriptions out of %v templates", len(descriptions), len(ti.templates)))
 	return descriptions, nil
 }
 

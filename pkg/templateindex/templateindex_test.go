@@ -19,6 +19,7 @@
 package templateindex
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/testutils"
@@ -166,6 +167,48 @@ func TestTemplateIndexerDescribeByFullFilter(t *testing.T) {
 		}
 		if desc.Workload != workload {
 			t.Errorf("OS mismatch: requested %v found %v", workload, desc.Workload)
+		}
+	}
+	// TODO: then, the filtered output must include ALL wanted data
+}
+
+func TestTemplateIndexerDescribeByFullFilterFromURL(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("cannot add test templates! %v", err)
+		return
+	}
+
+	u, err := url.Parse("http://localhost:18081/templates?size=medium&os=centos7.0&workload=generic")
+	if err != nil {
+		t.Errorf("cannot parse url %v", err)
+		return
+	}
+
+	descs, err := ti.DescribeBy(FilterOptionsFromURL(u))
+	if err != nil || len(descs) < 1 {
+		t.Errorf("unexpected output: %v err=%v", len(descs), err)
+		return
+	}
+
+	q := u.Query()
+	// first, the filtered output must NOT include unwanted data
+	for _, desc := range descs {
+		if desc.Size != q.Get("size") {
+			t.Errorf("Size mismatch: requested %v found %v", q.Get("size"), desc.Size)
+		}
+		if desc.OS != q.Get("os") {
+			t.Errorf("OS mismatch: requested %v found %v", q.Get("os"), desc.OS)
+		}
+		if desc.Workload != q.Get("workload") {
+			t.Errorf("OS mismatch: requested %v found %v", q.Get("workload"), desc.Workload)
 		}
 	}
 	// TODO: then, the filtered output must include ALL wanted data
