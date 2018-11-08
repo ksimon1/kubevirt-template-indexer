@@ -62,7 +62,73 @@ func TestTemplateIndexerEmptyLedger(t *testing.T) {
 	checkSummaries(t, summaries, expected)
 }
 
+func TestTemplateIndexerWorkloadLedger(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ld, err := NewJSONLedger("workload", "")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti.AddLedger("workload", ld)
+
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("failed to add test templates! %v", err)
+		return
+	}
+
+	summaries, err := ti.SummarizeBy("workload")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	expected := []Summary{
+		Summary{ID: "generic"},
+		Summary{ID: "highperformance"},
+	}
+	checkSummaries(t, summaries, expected)
+}
+
 func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("failed to add test templates! %v", err)
+		return
+	}
+
+	size := "medium"
+
+	descs, err := ti.DescribeBy(FilterOptions{
+		"size": size,
+	})
+	if err != nil || len(descs) < 1 {
+		t.Errorf("unexpected output: %v err=%v", len(descs), err)
+		return
+	}
+
+	// first, the filtered output must NOT include unwanted data
+	for _, desc := range descs {
+		if desc.Size != size {
+			t.Errorf("Size mismatch: requested %v found %v", size, desc.Size)
+		}
+	}
+	// TODO: then, the filtered output must include ALL wanted data
+}
+
+func TestTemplateIndexerDescribeByFullFilter(t *testing.T) {
 	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
 	if err != nil || len(templates) < 1 {
 		t.Errorf("cannot load test templates! %v", err)
@@ -76,10 +142,14 @@ func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
 		return
 	}
 
-	OS := "centos7.0"
+	os := "centos7.0"
+	size := "medium"
+	workload := "generic"
 
 	descs, err := ti.DescribeBy(FilterOptions{
-		"os": OS,
+		"size":     size,
+		"os":       os,
+		"workload": workload,
 	})
 	if err != nil || len(descs) < 1 {
 		t.Errorf("unexpected output: %v err=%v", len(descs), err)
@@ -88,9 +158,97 @@ func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
 
 	// first, the filtered output must NOT include unwanted data
 	for _, desc := range descs {
-		if desc.OS != OS {
-			t.Errorf("OS mismatch: requested %v found %v", OS, desc.OS)
+		if desc.Size != size {
+			t.Errorf("Size mismatch: requested %v found %v", size, desc.Size)
+		}
+		if desc.OS != os {
+			t.Errorf("OS mismatch: requested %v found %v", os, desc.OS)
+		}
+		if desc.Workload != workload {
+			t.Errorf("OS mismatch: requested %v found %v", workload, desc.Workload)
 		}
 	}
 	// TODO: then, the filtered output must include ALL wanted data
 }
+
+func TestTemplateIndexerAddUsingUpdate(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ld, err := NewJSONLedger("workload", "")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti.AddLedger("workload", ld)
+
+	for _, template := range templates {
+		ti.Update(&template)
+	}
+	if ti.Count() != len(templates) {
+		t.Errorf("failed to add test templates! %v", err)
+		return
+	}
+
+	// we just need something.
+	descs, err := ti.DescribeBy(FilterOptions{})
+	if err != nil || len(descs) < 1 {
+		t.Errorf("missing output: %v", err)
+		return
+	}
+
+	summaries, err := ti.SummarizeBy("workload")
+	if err != nil || len(summaries) < 1 {
+		t.Errorf("missing output: %v", err)
+		return
+	}
+}
+
+func TestTemplateIndexerRemoveUsingUpdate(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ld, err := NewJSONLedger("workload", "")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti.AddLedger("workload", ld)
+
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("failed to add test templates! %v", err)
+		return
+	}
+
+	for _, template := range templates {
+		ti.Update(&template)
+	}
+	if ti.Count() != 0 {
+		t.Errorf("failed to remove test templates! %v", err)
+		return
+	}
+
+	// we just need something.
+	descs, err := ti.DescribeBy(FilterOptions{})
+	if err != nil || len(descs) != 0 {
+		t.Errorf("unexpected output: %v", err)
+		return
+	}
+
+	summaries, err := ti.SummarizeBy("workload")
+	if err != nil || len(summaries) != 0 {
+		t.Errorf("unexpected output: %v", err)
+		return
+	}
+}
+
+// TODO: test to remove just a specific template
