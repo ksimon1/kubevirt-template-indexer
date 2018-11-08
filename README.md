@@ -228,7 +228,6 @@ TODO
 - logging is awful
 - routes package uses globals
 - error responses are not handled (and unspecified)
-- the /template filtering is not properly tested
 - check why sometimes the sync doesn't happen (just timing?)
 - functional tests?
 - integration tests

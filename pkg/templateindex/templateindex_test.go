@@ -294,4 +294,61 @@ func TestTemplateIndexerRemoveUsingUpdate(t *testing.T) {
 	}
 }
 
-// TODO: test to remove just a specific template
+func TestTemplateIndexerRemoveOnceUsingUpdate(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ld, err := NewJSONLedger("workload", "")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti.AddLedger("workload", ld)
+
+	count, err := ti.AddTemplates(templates)
+	if err != nil || count != len(templates) {
+		t.Errorf("failed to add test templates! %v", err)
+		return
+	}
+
+	fullCount := ti.Count()
+	toRemove := templates[1]
+	// randomly not the first or the last, just to avoid the most common path
+	// we don;t really care about which one we remove
+	ti.Update(&toRemove) // triggers removal
+
+	if ti.Count() != fullCount-1 {
+		t.Errorf("failed to remove the scapegoat template! %v", err)
+		return
+	}
+
+	// we just need something.
+	descs, err := ti.DescribeBy(FilterOptions{})
+	if err != nil || len(descs) != ti.Count() {
+		t.Errorf("unexpected output: %v", err)
+		return
+	}
+	for _, desc := range descs {
+		if desc.ID == toRemove.Name {
+			t.Errorf("template %v still in the output!", toRemove.Name)
+			return
+		}
+	}
+
+	summaries, err := ti.SummarizeBy("workload")
+	if err != nil || len(summaries) < 1 {
+		t.Errorf("unexpected output: %v", err)
+		return
+	}
+
+	for _, summary := range summaries {
+		if summary.ID == toRemove.Name {
+			t.Errorf("template %v still in the output!", toRemove.Name)
+			return
+		}
+	}
+}
