@@ -24,6 +24,12 @@ import (
 
 	flag "github.com/spf13/pflag"
 
+	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -44,6 +50,33 @@ import (
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/routes"
 )
 
+func zapLogger(development bool) logr.Logger {
+	sink := zapcore.AddSync(os.Stderr)
+
+	var encCfg zapcore.EncoderConfig
+	var lvl zap.AtomicLevel
+
+	opts := []zap.Option{
+		zap.Development(),
+		zap.AddStacktrace(zap.ErrorLevel),
+		zap.AddCallerSkip(1),
+		zap.ErrorOutput(sink),
+	}
+
+	if development {
+		encCfg = zap.NewDevelopmentEncoderConfig()
+		lvl = zap.NewAtomicLevelAt(zap.DebugLevel)
+	} else {
+		encCfg = zap.NewProductionEncoderConfig()
+		lvl = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
+
+	enc := zapcore.NewConsoleEncoder(encCfg)
+	log := zap.New(zapcore.NewCore(enc, sink, lvl))
+	log = log.WithOptions(opts...)
+	return zapr.NewLogger(log)
+}
+
 var log = logf.Log.WithName("kubevirt-template-indexer")
 
 type ledgerDesc struct {
@@ -59,7 +92,7 @@ func main() {
 	port := flag.IntP("port", "p", 8080, "listen on port for HTTP queries (default: 8080)")
 	flag.Parse()
 
-	logf.SetLogger(logf.ZapLogger(*develMode))
+	logf.SetLogger(zapLogger(*develMode))
 	entryLog := log.WithName("entrypoint")
 
 	index := templateindex.NewTemplateIndexer(log.WithName("indexer"))

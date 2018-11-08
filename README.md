@@ -225,7 +225,6 @@ Partially implemented and not supported yet.
 TODO
 ----
 - code docs
-- logging is awful
 - routes package uses globals
 - error responses are not handled (and unspecified)
 - functional tests?
