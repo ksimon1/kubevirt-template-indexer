@@ -22,11 +22,13 @@ import (
 	"net/url"
 	"testing"
 
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/testutils"
 )
 
 func TestTemplateIndexerCreatedEmpty(t *testing.T) {
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	count := ti.Count()
 	if count != 0 {
 		t.Errorf("unexpected count: %v", count)
@@ -34,7 +36,7 @@ func TestTemplateIndexerCreatedEmpty(t *testing.T) {
 }
 
 func TestTemplateIndexerUnknownLedger(t *testing.T) {
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	summaries, err := ti.SummarizeBy("unknown")
 	if err == nil {
 		t.Errorf("unexpectedly succesful")
@@ -51,7 +53,7 @@ func TestTemplateIndexerEmptyLedger(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	ti.AddLedger("foobar", ld)
 
 	summaries, err := ti.SummarizeBy("foobar")
@@ -75,7 +77,7 @@ func TestTemplateIndexerWorkloadLedger(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	ti.AddLedger("workload", ld)
 
 	count, err := ti.AddTemplates(templates)
@@ -103,7 +105,7 @@ func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
 		return
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
 		t.Errorf("failed to add test templates! %v", err)
@@ -136,7 +138,7 @@ func TestTemplateIndexerDescribeByFullFilter(t *testing.T) {
 		return
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
 		t.Errorf("cannot add test templates! %v", err)
@@ -179,7 +181,7 @@ func TestTemplateIndexerDescribeByFullFilterFromURL(t *testing.T) {
 		return
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
 		t.Errorf("cannot add test templates! %v", err)
@@ -226,7 +228,7 @@ func TestTemplateIndexerAddUsingUpdate(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	ti.AddLedger("workload", ld)
 
 	for _, template := range templates {
@@ -263,7 +265,7 @@ func TestTemplateIndexerRemoveUsingUpdate(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	ti.AddLedger("workload", ld)
 
 	count, err := ti.AddTemplates(templates)
@@ -306,7 +308,7 @@ func TestTemplateIndexerRemoveOnceUsingUpdate(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(logf.NullLogger{})
 	ti.AddLedger("workload", ld)
 
 	count, err := ti.AddTemplates(templates)

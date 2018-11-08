@@ -73,28 +73,3 @@ func LoadTemplates(path string) ([]templatev1.Template, error) {
 	}
 	return templates, nil
 }
-
-// NullLogger is a logr.Logger that does nothing.
-type NullLogger struct{}
-
-func (_ NullLogger) Info(_ string, _ ...interface{}) {
-}
-
-func (_ NullLogger) Enabled() bool {
-	return false
-}
-
-func (_ NullLogger) Error(_ error, _ string, _ ...interface{}) {
-}
-
-func (log NullLogger) V(_ int) logr.InfoLogger {
-	return log
-}
-
-func (log NullLogger) WithName(_ string) logr.Logger {
-	return log
-}
-
-func (log NullLogger) WithValues(_ ...interface{}) logr.Logger {
-	return log
-}
