@@ -12,6 +12,8 @@
 *.out
 
 # Golang stuff
+# # all-in-one YAML
+cluster/template-indexer.yaml
 cmd/kubevirt-template-indexer/kubevirt-template-indexer
 vendor/
 Gopkg.lock

@@ -31,9 +31,10 @@ spec:
               - "-N"
               - "kube-system"
           ports:
-            - containerPort: 8443
+            - containerPort: 18081
               name: "template-index"
               protocol: "TCP"
+              scheme: HTTP
           livenessProbe:
             failureThreshold: 8
             httpGet:

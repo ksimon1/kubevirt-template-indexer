@@ -14,8 +14,7 @@ TODO
 - code docs
 - routes package uses globals
 - error responses are not handled (and unspecified)
-- expose the service outside the cluster?
-- /template filtering is untested
+- the /template filtering is untested
 - lack of unit tests for "templateindex" package
 - check why sometimes the sync doesn't happen (just timing?)
 - functional tests?
