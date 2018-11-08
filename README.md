@@ -18,3 +18,5 @@ TODO
 - lack of unit tests for "templateindex" package
 - check why sometimes the sync doesn't happen (just timing?)
 - functional tests?
+- integration tests
+- e2e install document

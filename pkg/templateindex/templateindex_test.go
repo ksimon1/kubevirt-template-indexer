@@ -16,18 +16,16 @@
  * Copyright 2018 Red Hat, Inc.
  */
 
-package templateindex_test
+package templateindex
 
 import (
-	"sort"
 	"testing"
 
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/testutils"
-	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 
 func TestTemplateIndexerCreatedEmpty(t *testing.T) {
-	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(testutils.NullLogger{})
 	count := ti.Count()
 	if count != 0 {
 		t.Errorf("unexpected count: %v", count)
@@ -35,7 +33,7 @@ func TestTemplateIndexerCreatedEmpty(t *testing.T) {
 }
 
 func TestTemplateIndexerUnknownLedger(t *testing.T) {
-	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(testutils.NullLogger{})
 	summaries, err := ti.SummarizeBy("unknown")
 	if err == nil {
 		t.Errorf("unexpectedly succesful")
@@ -47,22 +45,21 @@ func TestTemplateIndexerUnknownLedger(t *testing.T) {
 }
 
 func TestTemplateIndexerEmptyLedger(t *testing.T) {
-	ld, err := templateindex.NewJSONLedger("foobar", "")
+	ld, err := NewJSONLedger("foobar", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
-	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(testutils.NullLogger{})
 	ti.AddLedger("foobar", ld)
 
 	summaries, err := ti.SummarizeBy("foobar")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	sort.Sort(testutils.ByID(summaries))
 
-	expected := []templateindex.Summary{}
-	testutils.CheckSummaries(t, summaries, expected)
+	expected := []Summary{}
+	checkSummaries(t, summaries, expected)
 }
 
 func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
@@ -72,7 +69,7 @@ func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
 		return
 	}
 
-	ti := templateindex.NewTemplateIndexer(testutils.NullLogger{})
+	ti := NewTemplateIndexer(testutils.NullLogger{})
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
 		t.Errorf("cannot add test templates! %v", err)
@@ -81,7 +78,7 @@ func TestTemplateIndexerDescribeBySimpleFilter(t *testing.T) {
 
 	OS := "centos7.0"
 
-	descs, err := ti.DescribeBy(templateindex.FilterOptions{
+	descs, err := ti.DescribeBy(FilterOptions{
 		"os": OS,
 	})
 	if err != nil || len(descs) < 1 {

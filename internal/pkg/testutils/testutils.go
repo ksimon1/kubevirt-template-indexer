@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
-	"testing"
 
 	"github.com/go-logr/logr"
 
@@ -35,25 +34,7 @@ import (
 	// while in cluster we only need the modern way, otherwise
 	// it breaks. TODO: investigate
 	_ "github.com/fromanirh/kubevirt-template-indexer/pkg/okdlegacy"
-	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
-
-type ByID []templateindex.Summary
-
-func (a ByID) Len() int           { return len(a) }
-func (a ByID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByID) Less(i, j int) bool { return a[i].ID < a[j].ID }
-
-func CheckSummaries(t *testing.T, summaries, expected []templateindex.Summary) {
-	if len(expected) != len(summaries) {
-		t.Errorf("expected %v summaries, received %v", len(expected), len(summaries))
-	}
-	for i, exp := range expected {
-		if exp != summaries[i] {
-			t.Errorf("expected=%#v received=%#v", exp, summaries[i])
-		}
-	}
-}
 
 func LoadYAML(path string) ([][]byte, error) {
 	src, err := os.Open(path)

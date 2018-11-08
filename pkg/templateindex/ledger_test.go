@@ -16,14 +16,12 @@
  * Copyright 2018 Red Hat, Inc.
  */
 
-package templateindex_test
+package templateindex
 
 import (
-	"sort"
 	"testing"
 
 	"github.com/fromanirh/kubevirt-template-indexer/internal/pkg/testutils"
-	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 
 func TestDescribe(t *testing.T) {
@@ -33,7 +31,7 @@ func TestDescribe(t *testing.T) {
 		return
 	}
 	for _, template := range templates {
-		desc := templateindex.Describe(&template, templateindex.FilterOptions{})
+		desc := Describe(&template, FilterOptions{})
 		if desc.Name == "" || desc.ID == "" || desc.Icon == "" || desc.OS == "" || desc.Workload == "" || desc.Size == "" {
 			t.Errorf("%#v", desc)
 		}
@@ -41,7 +39,7 @@ func TestDescribe(t *testing.T) {
 }
 
 func TestCreateJSONLedgerWithoutFile(t *testing.T) {
-	_, err := templateindex.NewJSONLedger("os", "")
+	_, err := NewJSONLedger("os", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -54,16 +52,15 @@ func TestInvalidLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := templateindex.NewJSONLedger("foobar", "")
+	ld, err := NewJSONLedger("foobar", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
 	summaries := ld.Summarize(templates)
-	sort.Sort(testutils.ByID(summaries))
 
-	expected := []templateindex.Summary{}
-	testutils.CheckSummaries(t, summaries, expected)
+	expected := []Summary{}
+	checkSummaries(t, summaries, expected)
 }
 
 func TestOSLedger(t *testing.T) {
@@ -73,33 +70,32 @@ func TestOSLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := templateindex.NewJSONLedger("os", "")
+	ld, err := NewJSONLedger("os", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
 	summaries := ld.Summarize(templates)
-	sort.Sort(testutils.ByID(summaries))
 
-	expected := []templateindex.Summary{
-		templateindex.Summary{ID: "centos7.0"},
-		templateindex.Summary{ID: "fedora26"},
-		templateindex.Summary{ID: "fedora27"},
-		templateindex.Summary{ID: "fedora28"},
-		templateindex.Summary{ID: "opensuse15.0"},
-		templateindex.Summary{ID: "rhel7.0"},
-		templateindex.Summary{ID: "rhel7.1"},
-		templateindex.Summary{ID: "rhel7.2"},
-		templateindex.Summary{ID: "rhel7.3"},
-		templateindex.Summary{ID: "rhel7.4"},
-		templateindex.Summary{ID: "rhel7.5"},
-		templateindex.Summary{ID: "ubuntu18.04"},
-		templateindex.Summary{ID: "win10"},
-		templateindex.Summary{ID: "win2k12r2"},
-		templateindex.Summary{ID: "win2k8"},
-		templateindex.Summary{ID: "win2k8r2"},
+	expected := []Summary{
+		Summary{ID: "centos7.0"},
+		Summary{ID: "fedora26"},
+		Summary{ID: "fedora27"},
+		Summary{ID: "fedora28"},
+		Summary{ID: "opensuse15.0"},
+		Summary{ID: "rhel7.0"},
+		Summary{ID: "rhel7.1"},
+		Summary{ID: "rhel7.2"},
+		Summary{ID: "rhel7.3"},
+		Summary{ID: "rhel7.4"},
+		Summary{ID: "rhel7.5"},
+		Summary{ID: "ubuntu18.04"},
+		Summary{ID: "win10"},
+		Summary{ID: "win2k12r2"},
+		Summary{ID: "win2k8"},
+		Summary{ID: "win2k8r2"},
 	}
-	testutils.CheckSummaries(t, summaries, expected)
+	checkSummaries(t, summaries, expected)
 }
 
 func TestWorkloadLedger(t *testing.T) {
@@ -109,19 +105,18 @@ func TestWorkloadLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := templateindex.NewJSONLedger("workload", "")
+	ld, err := NewJSONLedger("workload", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
 	summaries := ld.Summarize(templates)
-	sort.Sort(testutils.ByID(summaries))
 
-	expected := []templateindex.Summary{
-		templateindex.Summary{ID: "generic"},
-		templateindex.Summary{ID: "highperformance"},
+	expected := []Summary{
+		Summary{ID: "generic"},
+		Summary{ID: "highperformance"},
 	}
-	testutils.CheckSummaries(t, summaries, expected)
+	checkSummaries(t, summaries, expected)
 }
 
 func TestSizeLedger(t *testing.T) {
@@ -131,19 +126,29 @@ func TestSizeLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := templateindex.NewJSONLedger("flavor", "")
+	ld, err := NewJSONLedger("flavor", "")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 
 	summaries := ld.Summarize(templates)
-	sort.Sort(testutils.ByID(summaries))
 
-	expected := []templateindex.Summary{
-		templateindex.Summary{ID: "large"},
-		templateindex.Summary{ID: "medium"},
-		templateindex.Summary{ID: "small"},
-		templateindex.Summary{ID: "tiny"},
+	expected := []Summary{
+		Summary{ID: "large"},
+		Summary{ID: "medium"},
+		Summary{ID: "small"},
+		Summary{ID: "tiny"},
 	}
-	testutils.CheckSummaries(t, summaries, expected)
+	checkSummaries(t, summaries, expected)
+}
+
+func checkSummaries(t *testing.T, summaries, expected []Summary) {
+	if len(expected) != len(summaries) {
+		t.Errorf("expected %v summaries, received %v", len(expected), len(summaries))
+	}
+	for i, exp := range expected {
+		if exp != summaries[i] {
+			t.Errorf("expected=%#v received=%#v", exp, summaries[i])
+		}
+	}
 }

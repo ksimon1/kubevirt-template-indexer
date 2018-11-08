@@ -19,6 +19,8 @@
 package templateindex
 
 import (
+	"sort"
+
 	templatev1 "github.com/openshift/api/template/v1"
 )
 
@@ -101,5 +103,12 @@ func (ld *JSONLedger) Summarize(templates []templatev1.Template) []Summary {
 			seen.Add(flavour)
 		}
 	}
+	sort.Sort(byID(summaries))
 	return summaries
 }
+
+type byID []Summary
+
+func (a byID) Len() int           { return len(a) }
+func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }

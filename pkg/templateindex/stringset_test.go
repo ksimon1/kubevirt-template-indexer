@@ -16,23 +16,21 @@
  * Copyright 2018 Red Hat, Inc.
  */
 
-package templateindex_test
+package templateindex
 
 import (
 	"testing"
-
-	"github.com/fromanirh/kubevirt-template-indexer/pkg/templateindex"
 )
 
 func TestStringSetCreatedEmpty(t *testing.T) {
-	s := templateindex.NewStringSet()
+	s := NewStringSet()
 	if s.Contains("foobar") {
 		t.Errorf("unexpectedly contains foobar")
 	}
 }
 
 func TestStringSetAdd(t *testing.T) {
-	s := templateindex.NewStringSet()
+	s := NewStringSet()
 	s.Add("foobar")
 	if !s.Contains("foobar") {
 		t.Errorf("unexpectedly missing foobar")
@@ -40,7 +38,7 @@ func TestStringSetAdd(t *testing.T) {
 }
 
 func TestStringSetAddRemove(t *testing.T) {
-	s := templateindex.NewStringSet()
+	s := NewStringSet()
 	s.Add("foobar")
 	s.Remove("foobar")
 	if s.Contains("foobar") {
