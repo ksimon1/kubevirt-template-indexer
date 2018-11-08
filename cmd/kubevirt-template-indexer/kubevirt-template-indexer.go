@@ -55,8 +55,8 @@ func main() {
 	develMode := flag.BoolP("develmode", "D", false, "enable development mode (more logs)")
 	startupSync := flag.BoolP("skipsync", "s", true, "skip initial sync with cluster")
 	namespace := flag.StringP("namespace", "N", "", "restrict namespace to watch (default: all)")
-	iface := flag.StringP("interface", "I", "", "listen only on this interface for REST queries (default: all)")
-	port := flag.IntP("port", "p", 8080, "listen on port for REST queries (default: 8080)")
+	iface := flag.StringP("interface", "I", "", "listen only on this interface for HTTP queries (default: all)")
+	port := flag.IntP("port", "p", 8080, "listen on port for HTTP queries (default: 8080)")
 	flag.Parse()
 
 	logf.SetLogger(logf.ZapLogger(*develMode))
@@ -123,8 +123,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	entryLog.Info("starting REST endpoints")
-	go routes.Serve(*iface, *port, index, log.WithName("restapi"))
+	entryLog.Info("starting HTTP endpoints")
+	go routes.Serve(*iface, *port, index, log.WithName("httpapi"))
 
 	entryLog.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
