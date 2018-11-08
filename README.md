@@ -9,12 +9,70 @@ Copyright: Red Hat Inc
 Description
 -----------
 
-TODO
+`kubevirt-template-indexer` provides indexing services for the [kubevirt VM templates](https://github.com/kubevirt/common-templates/) through HTTP endpoints.
+A client can connect to the server to get a filtered view of the templates deployed in the cluster, and to have summaries about them.
 
 Usage
 -----
 
-TODO
+The server exposes four HTTP endpoints, providing answers in JSON.
+
+`/oses` returns a collection of all the OS of the templates deployed in the cluster. Example response:
+```json
+[
+    {
+        "id": "centos7.0",
+        "name": ""
+    },
+    {
+        "id": "opensuse15.0",
+        "name": ""
+    },
+    {
+        "id": "fedora28",
+        "name": ""
+    }
+]
+```
+
+`/workloads` returns a collection of all the Workloads of the templates. Example response:
+```json
+[
+    {
+        "id": "generic",
+        "name": ""
+    },
+    {
+        "id": "highperformance",
+        "name": ""
+    }
+]
+```
+
+`/size` returns a collection of all the size (flavors) of the templates. Example response:
+```json
+[
+    {
+        "id": "tiny",
+        "name": ""
+    },
+    {
+        "id": "medium",
+        "name": ""
+    },
+    {
+        "id": "large",
+        "name": ""
+    },
+    {
+        "id": "small",
+        "name": ""
+    }
+]
+```
+
+`/templates` return a summary of all the templates. Example response:
+
 
 Build
 -----
@@ -53,7 +111,7 @@ To run the server in a kubernetes cluster, just run
 kubectl create -f template-indexer.yaml
 ```
 
-the `template-indexer.yaml` file is an amalgamation of the manifests which define the account/rbac settings, the deployment and the service.
+the `template-indexer.yaml` file is an amalgamation of the manifests which define the account/RBAC settings, the deployment and the service.
 If you need for whatever reason to (re)create it, do
 ```
 make -C cluster
@@ -62,7 +120,7 @@ make -C cluster
 If you want to install the server step by step:
 first, set up the accounts and RBAC:
 ```
-kubectl create -f cluster/template-indexer-rbac.yaml
+kubectl create -f cluster/template-indexer-RBAC.yaml
 ```
 
 Then deploy the server:
@@ -78,7 +136,7 @@ kubectl create -f cluster/template-indexer-service.yaml
 Run it outside a Kubernetes cluster
 -----------------------------------
 
-Partially implemented and not suppored yet.
+Partially implemented and not supported yet.
 
 
 TODO
