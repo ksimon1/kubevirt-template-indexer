@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: kubevirt-template-indexer
+  name: template-index
   namespace: kube-system
   labels:
-    kubevirt.io: "template-indexer"
+    kubevirt.io: "template-index"
 spec:
   replicas: 1
   template:
@@ -19,9 +19,9 @@ spec:
                     }
                   ]
       labels:
-        kubevirt.io: kubevirt-template-indexer
+        kubevirt.io: template-index
     spec:
-      serviceAccountName: template-indexer 
+      serviceAccountName: template-index
       containers:
         - name: kubevirt-template-indexer
           image: fromanirh/kubevirt-template-indexer:devel
@@ -30,16 +30,10 @@ spec:
               - "kubevirt-template-indexer"
               - "-N"
               - "kube-system"
+              - "-p"
+              - "18081"
           ports:
             - containerPort: 18081
               name: "template-index"
               protocol: "TCP"
               scheme: HTTP
-          livenessProbe:
-            failureThreshold: 8
-            httpGet:
-              scheme: HTTPS
-              port: 8443
-              path: /healthz
-            initialDelaySeconds: 15
-            timeoutSeconds: 10
