@@ -72,6 +72,89 @@ The server exposes four HTTP endpoints, providing answers in JSON.
 ```
 
 `/templates` return a summary of all the templates. Example response:
+```json
+[
+    {
+        "id": "centos7-generic-large",
+        "name": "CentOS 7.0+ VM",
+        "description": "This template can be used to create a VM suitable for CentOS 7 and newer. The template assumes that a PVC is available which is providing the necessary CentOS disk image.",
+        "icon-id": "icon-centos",
+        "osid": "centos7.0",
+        "workload": "generic",
+        "size": "large"
+    },
+    {
+        "id": "centos7-generic-small",
+        "name": "CentOS 7.0+ VM",
+        "description": "This template can be used to create a VM suitable for CentOS 7 and newer. The template assumes that a PVC is available which is providing the necessary CentOS disk image.",
+        "icon-id": "icon-centos",
+        "osid": "centos7.0",
+        "workload": "generic",
+        "size": "small"
+    },
+    {
+        "id": "centos7-generic-medium",
+        "name": "CentOS 7.0+ VM",
+        "description": "This template can be used to create a VM suitable for CentOS 7 and newer. The template assumes that a PVC is available which is providing the necessary CentOS disk image.",
+        "icon-id": "icon-centos",
+        "osid": "centos7.0",
+        "workload": "generic",
+        "size": "medium"
+    },
+    {
+        "id": "centos7-generic-tiny",
+        "name": "CentOS 7.0+ VM",
+        "description": "This template can be used to create a VM suitable for CentOS 7 and newer. The template assumes that a PVC is available which is providing the necessary CentOS disk image.",
+        "icon-id": "icon-centos",
+        "osid": "centos7.0",
+        "workload": "generic",
+        "size": "tiny"
+    }
+]
+```
+
+You can filter the output using the query parameters. Example:
+```json
+[
+    {
+        "id": "fedora-highperformance-large",
+        "name": "Fedora 23+ VM",
+        "description": "This template can be used to create a VM suitable for Fedora 23 and newer. The template assumes that a PVC is available which is providing the necessary Fedora disk image.\nRecommended disk image (needs to be converted to raw) https://download.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2",
+        "icon-id": "icon-fedora",
+        "osid": "fedora28",
+        "workload": "highperformance",
+        "size": "large"
+    },
+    {
+        "id": "fedora-highperformance-small",
+        "name": "Fedora 23+ VM",
+        "description": "This template can be used to create a VM suitable for Fedora 23 and newer. The template assumes that a PVC is available which is providing the necessary Fedora disk image.\nRecommended disk image (needs to be converted to raw) https://download.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2",
+        "icon-id": "icon-fedora",
+        "osid": "fedora28",
+        "workload": "highperformance",
+        "size": "small"
+    },
+    {
+        "id": "fedora-highperformance-tiny",
+        "name": "Fedora 23+ VM",
+        "description": "This template can be used to create a VM suitable for Fedora 23 and newer. The template assumes that a PVC is available which is providing the necessary Fedora disk image.\nRecommended disk image (needs to be converted to raw) https://download.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2",
+        "icon-id": "icon-fedora",
+        "osid": "fedora28",
+        "workload": "highperformance",
+        "size": "tiny"
+    },
+    {
+        "id": "fedora-highperformance-medium",
+        "name": "Fedora 23+ VM",
+        "description": "This template can be used to create a VM suitable for Fedora 23 and newer. The template assumes that a PVC is available which is providing the necessary Fedora disk image.\nRecommended disk image (needs to be converted to raw) https://download.fedoraproject.org/pub/fedora/linux/releases/28/Cloud/x86_64/images/Fedora-Cloud-Base-28-1.1.x86_64.qcow2",
+        "icon-id": "icon-fedora",
+        "osid": "fedora28",
+        "workload": "highperformance",
+        "size": "medium"
+    }
+]
+```
+Possible filter parameters are `size`, `os`, `workload`.
 
 
 Build
