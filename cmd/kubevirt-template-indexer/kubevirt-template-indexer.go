@@ -21,6 +21,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	flag "github.com/spf13/pflag"
 
@@ -90,6 +91,7 @@ func main() {
 	namespace := flag.StringP("namespace", "N", "", "restrict namespace to watch (default: all)")
 	iface := flag.StringP("interface", "I", "", "listen only on this interface for HTTP queries (default: all)")
 	port := flag.IntP("port", "p", 8080, "listen on port for HTTP queries (default: 8080)")
+	configDir := flag.StringP("confdir", "C", "/etc/template-index", "base directory for the config map files")
 	flag.Parse()
 
 	logf.SetLogger(zapLogger(*develMode))
@@ -112,10 +114,13 @@ func main() {
 		},
 	}
 	for _, desc := range descs {
-		ld, err := templateindex.NewJSONLedger(desc.Label, "")
+		ld := templateindex.NewJSONLedger(desc.Label)
+
+		confPath := filepath.Join(*configDir, desc.Name)
+		err := ld.ReadNameMap(confPath)
 		if err != nil {
-			entryLog.Error(err, fmt.Sprintf("unable to set up ledger: %s for %s", desc.Name, desc.Label))
-			os.Exit(1)
+			entryLog.Error(err, fmt.Sprintf("unable read name map %s for ledger %->%s: %s", confPath, desc.Name, desc.Label, err))
+			// we can carry on with less data
 		}
 
 		index.AddLedger(desc.Name, ld)

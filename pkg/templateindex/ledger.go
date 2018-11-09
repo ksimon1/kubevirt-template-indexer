@@ -19,6 +19,8 @@
 package templateindex
 
 import (
+	"encoding/json"
+	"os"
 	"sort"
 
 	templatev1 "github.com/openshift/api/template/v1"
@@ -73,13 +75,27 @@ type JSONLedger struct {
 	names map[string]string
 }
 
-func NewJSONLedger(label, path string) (*JSONLedger, error) {
-	ld := &JSONLedger{
+func NewJSONLedger(label string) *JSONLedger {
+	return &JSONLedger{
 		label: label,
 		names: make(map[string]string),
 	}
-	// TODO: read names
-	return ld, nil
+}
+
+func (ld *JSONLedger) ReadNameMap(path string) error {
+	if path == "" {
+		return nil
+	}
+
+	src, err := os.Open(path)
+	defer src.Close()
+	if err != nil {
+		return err
+	}
+
+	dec := json.NewDecoder(src)
+	err = dec.Decode(&ld.names)
+	return err
 }
 
 func (ld *JSONLedger) Summarize(templates []templatev1.Template) []Summary {

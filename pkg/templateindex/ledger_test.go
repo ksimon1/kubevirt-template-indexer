@@ -39,7 +39,8 @@ func TestDescribe(t *testing.T) {
 }
 
 func TestCreateJSONLedgerWithoutFile(t *testing.T) {
-	_, err := NewJSONLedger("os", "")
+	ld := NewJSONLedger("os")
+	err := ld.ReadNameMap("")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -52,11 +53,7 @@ func TestInvalidLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("foobar", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
+	ld := NewJSONLedger("foobar")
 	summaries := ld.Summarize(templates)
 
 	expected := []Summary{}
@@ -70,10 +67,7 @@ func TestOSLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("os", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
+	ld := NewJSONLedger("os")
 
 	summaries := ld.Summarize(templates)
 
@@ -105,11 +99,7 @@ func TestWorkloadLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("workload", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
+	ld := NewJSONLedger("workload")
 	summaries := ld.Summarize(templates)
 
 	expected := []Summary{
@@ -126,11 +116,7 @@ func TestSizeLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("flavor", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
+	ld := NewJSONLedger("flavor")
 	summaries := ld.Summarize(templates)
 
 	expected := []Summary{
@@ -138,6 +124,42 @@ func TestSizeLedger(t *testing.T) {
 		Summary{ID: "medium"},
 		Summary{ID: "small"},
 		Summary{ID: "tiny"},
+	}
+	checkSummaries(t, summaries, expected)
+}
+
+func TestSizeLedgerWithNames(t *testing.T) {
+	templates, err := testutils.LoadTemplates("test-data-alltemplates.yaml")
+	if err != nil || len(templates) < 1 {
+		t.Errorf("cannot load test templates! %v", err)
+		return
+	}
+
+	ld := NewJSONLedger("flavor")
+	err = ld.ReadNameMap("test-size-names.json")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+
+	summaries := ld.Summarize(templates)
+
+	expected := []Summary{
+		Summary{
+			ID:   "large",
+			Name: "pretty big instance type",
+		},
+		Summary{
+			ID:   "medium",
+			Name: "average instance type",
+		},
+		Summary{
+			ID:   "small",
+			Name: "small instance type",
+		},
+		Summary{
+			ID:   "tiny",
+			Name: "minuscule instance type",
+		},
 	}
 	checkSummaries(t, summaries, expected)
 }

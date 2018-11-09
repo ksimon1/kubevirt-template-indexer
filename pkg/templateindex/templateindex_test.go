@@ -48,13 +48,8 @@ func TestTemplateIndexerUnknownLedger(t *testing.T) {
 }
 
 func TestTemplateIndexerEmptyLedger(t *testing.T) {
-	ld, err := NewJSONLedger("foobar", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
 	ti := NewTemplateIndexer(logf.NullLogger{})
-	ti.AddLedger("foobar", ld)
+	ti.AddLedger("foobar", NewJSONLedger("foobar"))
 
 	summaries, err := ti.SummarizeBy("foobar")
 	if err != nil {
@@ -72,13 +67,8 @@ func TestTemplateIndexerWorkloadLedger(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("workload", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
 	ti := NewTemplateIndexer(logf.NullLogger{})
-	ti.AddLedger("workload", ld)
+	ti.AddLedger("workload", NewJSONLedger("workload"))
 
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
@@ -223,13 +213,8 @@ func TestTemplateIndexerAddUsingUpdate(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("workload", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
 	ti := NewTemplateIndexer(logf.NullLogger{})
-	ti.AddLedger("workload", ld)
+	ti.AddLedger("workload", NewJSONLedger("workload"))
 
 	for _, template := range templates {
 		ti.Update(&template)
@@ -260,13 +245,8 @@ func TestTemplateIndexerRemoveUsingUpdate(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("workload", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
 	ti := NewTemplateIndexer(logf.NullLogger{})
-	ti.AddLedger("workload", ld)
+	ti.AddLedger("workload", NewJSONLedger("workload"))
 
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {
@@ -303,13 +283,8 @@ func TestTemplateIndexerRemoveOnceUsingUpdate(t *testing.T) {
 		return
 	}
 
-	ld, err := NewJSONLedger("workload", "")
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-
 	ti := NewTemplateIndexer(logf.NullLogger{})
-	ti.AddLedger("workload", ld)
+	ti.AddLedger("workload", NewJSONLedger("workload"))
 
 	count, err := ti.AddTemplates(templates)
 	if err != nil || count != len(templates) {

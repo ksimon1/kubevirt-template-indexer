@@ -71,6 +71,13 @@ The server exposes four HTTP endpoints, providing answers in JSON.
 ]
 ```
 
+Notice that the "name" field of the returned values above is empty. This is because the server cannot figure out where to look for
+the description of the summarized itemd. You can supply configuration files to fill this information.
+A configuration file must be a JSON file sitting in the directory specified by the `-C` flag. You need a file for each `os`, `workload`, `size`.
+For example, to set the names for the `size`s, using the defaults, you can drop the file under `/etc/template-index/size.json`
+
+The content should be a JSON map whose keys are the known sizes, and whose values are the names you want to set. Look under `examples/` for examples.
+
 `/templates` return a summary of all the templates. Example response:
 ```json
 [

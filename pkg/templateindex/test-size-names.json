@@ -1,0 +1,6 @@
+{
+	"small": "small instance type",
+	"large": "pretty big instance type",
+	"medium": "average instance type",
+	"tiny": "minuscule instance type"
+}
