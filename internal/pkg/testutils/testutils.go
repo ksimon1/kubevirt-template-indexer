@@ -23,8 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/go-logr/logr"
-
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/client-go/kubernetes/scheme"
 
