@@ -24,13 +24,14 @@ type Routes []Route
 var log logr.Logger
 var index *templateindex.TemplateIndexer
 
+//NewRouter creates router with basic routes and logging middleware
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
+		handler = logger(handler, route.Name)
 
 		router.
 			Methods(route.Method).
@@ -42,7 +43,8 @@ func NewRouter() *mux.Router {
 	return router
 }
 
-func Logger(inner http.Handler, name string) http.Handler {
+//logger creates logging middleware
+func logger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		inner.ServeHTTP(w, r)
@@ -56,6 +58,7 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
+//slice of all available routes
 var routes = Routes{
 	Route{
 		"oses",
@@ -96,7 +99,6 @@ func sizes(w http.ResponseWriter, r *http.Request) {
 }
 
 func templates(w http.ResponseWriter, r *http.Request) {
-
 	descriptions, err := index.DescribeBy(templateindex.FilterOptionsFromURL(r.URL))
 	if err != nil {
 		panic(err)
@@ -124,6 +126,7 @@ func summarize(label string, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Serve creates new server
 func Serve(host string, port int, index_ *templateindex.TemplateIndexer, log_ logr.Logger) error {
 	index = index_
 	log = log_
